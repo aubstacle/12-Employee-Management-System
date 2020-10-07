@@ -32,7 +32,7 @@ function init() {
           "View All Employees",
           "View All Departments",
           "View All Roles",
-          //   "View All Employees by Department",
+          "View Employees by Department",
           //   "View All Employees by Manager",
           "Add Employee",
           //   "Remove Employee",
@@ -49,6 +49,8 @@ function init() {
         viewDepartments();
       } else if (ans.start === "View All Roles") {
         viewRoles();
+      } else if (ans.start === "View Employees by Department") {
+        viewByDepartment();
       } else if (ans.start === "Add Employee") {
         addEmployee();
       } else if (ans.start === "Update Employee Role") {
@@ -109,7 +111,6 @@ function addEmployee() {
             init();
           }
         );
-        
       });
   });
 }
@@ -123,9 +124,34 @@ function viewDepartments() {
 }
 
 function viewRoles() {
-    connection.query("SELECT * FROM role", (err, data) => {
-        if (err) throw err;
-        console.table(data);
-        init();
-    })
+  connection.query("SELECT * FROM role", (err, data) => {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+
+function viewByDepartment() {
+  connection.query("SELECT * FROM department", (err, data) => {
+    const departmentTitle = data.map((department) => department.department);
+    inquirer
+      .prompt([
+        {
+          name: "dept",
+          type: "list",
+          message: "Which department do you want to see?",
+          choices: departmentTitle,
+        },
+      ])
+      .then(({ dept }) => {
+        connection.query(
+          `SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id WHERE department = '${dept}';`,
+          (err, data) => {
+            if (err) throw err;
+            console.table(data);
+            init();
+          }
+        );
+      });
+  });
 }
