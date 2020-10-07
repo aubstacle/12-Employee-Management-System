@@ -12,25 +12,57 @@ var connection = mysql.createConnection({
 
   // Your password
   password: "Freeman5",
-  database: "employees_db"
+  database: "employees_db",
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) throw err;
-  console.log("connected as id " + connection.threadId)
+  console.log("connected as id " + connection.threadId);
   promptEmployee();
 });
 
 function promptEmployee() {
-    inquirer.prompt([
-        {
-            name: 'start',
-            type: 'list',
-            message: 'Do you want to view, update or add to your employment team?',
-            choices: ['Add', 'View', 'Update']
-        }
-    ]).then((ans) => {
-        console.log(ans)
+  inquirer
+    .prompt([
+      {
+        name: "start",
+        type: "list",
+        message: "What would you like to do?",
+        choices: [
+          "View All Employees",
+          //   "View All Employees by Department",
+          //   "View All Employees by Manager",
+          "Add employee",
+          //   "Remove Employee",
+          "Update Employee Role",
+          //   "Update Employee Manager",
+          "Exit",
+        ],
+      },
+    ])
+    .then((ans) => {
+      if (ans.start === "View All Employees") {
+        viewEmployees();
+      } else if (ans.start === "Add Employee") {
+        addEmployee();
+      } else if (ans.start === "Update Employee Role") {
+        updateRole();
+      } else if (ans.start === "Exit") {
+        connection.end();
+      }
+    });
+}
 
+function viewEmployees(){
+    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id;", 
+    (err, data) => {
+        if (err) throw err;
+        console.table(data);
+        promptEmployee();
     })
+
+}
+
+function addEmployee() {
+    
 }
