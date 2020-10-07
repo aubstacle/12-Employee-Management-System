@@ -36,6 +36,7 @@ function init() {
           "View Employees by Role",
           "Add Employee",
           //   "Remove Employee",
+          "Add Role",
           "Update Employee Role",
           //   "Update Employee Manager",
           "Exit",
@@ -55,6 +56,8 @@ function init() {
         viewByRole();
       } else if (ans.start === "Add Employee") {
         addEmployee();
+      } else if (ans.start === "Add Role") {
+        addRole();
       } else if (ans.start === "Update Employee Role") {
         updateRole();
       } else if (ans.start === "Exit") {
@@ -106,6 +109,49 @@ function addEmployee() {
             first_name: first,
             last_name: last,
             role_id: titleChoice.id,
+          },
+
+          (err, data) => {
+            if (err) throw err;
+            init();
+          }
+        );
+      });
+  });
+}
+
+function addRole() {
+  connection.query("SELECT * FROM department", (err, data) => {
+    const deptTitle = data.map((department) => department.department);
+    inquirer
+      .prompt([
+        {
+          name: "role",
+          type: "input",
+          message: "What is the name of the new role?",
+        },
+        {
+          name: "salary",
+          type: "input",
+          message: "What is the salary for this new role?",
+        },
+        {
+          name: "dept",
+          type: "list",
+          message: "What department does this role fall under?",
+          choices: deptTitle,
+        },
+      ])
+      .then(({ role, salary, dept }) => {
+        const roleChoice = data.find(
+          (departmentObject) => departmentObject.department === dept
+        );
+        connection.query(
+          "INSERT INTO role SET ?",
+          {
+            title: role,
+            salary: salary,
+            department_id: roleChoice.id,
           },
 
           (err, data) => {
