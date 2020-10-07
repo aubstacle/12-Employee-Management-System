@@ -18,10 +18,10 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
-  promptEmployee();
+  init();
 });
 
-function promptEmployee() {
+function init() {
   inquirer
     .prompt([
       {
@@ -30,6 +30,8 @@ function promptEmployee() {
         message: "What would you like to do?",
         choices: [
           "View All Employees",
+          "View All Departments",
+          "View All Roles",
           //   "View All Employees by Department",
           //   "View All Employees by Manager",
           "Add Employee",
@@ -43,6 +45,10 @@ function promptEmployee() {
     .then((ans) => {
       if (ans.start === "View All Employees") {
         viewEmployees();
+      } else if (ans.start === "View All Departments") {
+        viewDepartments();
+      } else if (ans.start === "View All Roles") {
+        viewRoles();
       } else if (ans.start === "Add Employee") {
         addEmployee();
       } else if (ans.start === "Update Employee Role") {
@@ -59,7 +65,7 @@ function viewEmployees() {
     (err, data) => {
       if (err) throw err;
       console.table(data);
-      promptEmployee();
+      init();
     }
   );
 }
@@ -87,7 +93,9 @@ function addEmployee() {
         },
       ])
       .then(({ first, last, title }) => {
-        const titleChoice = data.find((roleObject) => roleObject.title === title);
+        const titleChoice = data.find(
+          (roleObject) => roleObject.title === title
+        );
         connection.query(
           "INSERT INTO employee SET ?",
           {
@@ -98,9 +106,26 @@ function addEmployee() {
 
           (err, data) => {
             if (err) throw err;
-            promptEmployee();
+            init();
           }
         );
+        
       });
   });
+}
+
+function viewDepartments() {
+  connection.query("SELECT * FROM department", (err, data) => {
+    if (err) throw err;
+    console.table(data);
+    init();
+  });
+}
+
+function viewRoles() {
+    connection.query("SELECT * FROM role", (err, data) => {
+        if (err) throw err;
+        console.table(data);
+        init();
+    })
 }
