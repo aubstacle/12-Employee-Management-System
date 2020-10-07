@@ -32,7 +32,7 @@ function promptEmployee() {
           "View All Employees",
           //   "View All Employees by Department",
           //   "View All Employees by Manager",
-          "Add employee",
+          "Add Employee",
           //   "Remove Employee",
           "Update Employee Role",
           //   "Update Employee Manager",
@@ -53,16 +53,54 @@ function promptEmployee() {
     });
 }
 
-function viewEmployees(){
-    connection.query("SELECT employee.first_name, employee.last_name, role.title, role.salary, department.name FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id;", 
+function viewEmployees() {
+  connection.query(
+    "SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id;",
     (err, data) => {
-        if (err) throw err;
-        console.table(data);
-        promptEmployee();
-    })
-
+      if (err) throw err;
+      console.table(data);
+      promptEmployee();
+    }
+  );
 }
 
 function addEmployee() {
-    
+  connection.query("SELECT * FROM role", (err, data) => {
+    const roleTitle = data.map((role) => role.title);
+    inquirer
+      .prompt([
+        {
+          name: "first",
+          type: "input",
+          message: "What is the employee's first name?",
+        },
+        {
+          name: "last",
+          type: "input",
+          message: "What is the employee's last name?",
+        },
+        {
+          name: "title",
+          type: "list",
+          message: "What is the employee's title?",
+          choices: roleTitle,
+        },
+      ])
+      .then(({ first, last, title }) => {
+        const titleChoice = data.find((roleObject) => roleObject.title === title);
+        connection.query(
+          "INSERT INTO employee SET ?",
+          {
+            first_name: first,
+            last_name: last,
+            role_id: titleChoice.id,
+          },
+
+          (err, data) => {
+            if (err) throw err;
+            promptEmployee();
+          }
+        );
+      });
+  });
 }
