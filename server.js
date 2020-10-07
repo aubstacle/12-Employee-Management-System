@@ -33,7 +33,7 @@ function init() {
           "View All Departments",
           "View All Roles",
           "View Employees by Department",
-          //   "View All Employees by Manager",
+          "View Employees by Role",
           "Add Employee",
           //   "Remove Employee",
           "Update Employee Role",
@@ -51,6 +51,8 @@ function init() {
         viewRoles();
       } else if (ans.start === "View Employees by Department") {
         viewByDepartment();
+      } else if (ans.start === "View Employees by Role") {
+        viewByRole();
       } else if (ans.start === "Add Employee") {
         addEmployee();
       } else if (ans.start === "Update Employee Role") {
@@ -133,19 +135,44 @@ function viewRoles() {
 
 function viewByDepartment() {
   connection.query("SELECT * FROM department", (err, data) => {
-    const departmentTitle = data.map((department) => department.department);
+    const departmentTitles = data.map((department) => department.department);
     inquirer
       .prompt([
         {
           name: "dept",
           type: "list",
-          message: "Which department do you want to see?",
-          choices: departmentTitle,
+          message: "Which department employees do you want to see?",
+          choices: departmentTitles,
         },
       ])
       .then(({ dept }) => {
         connection.query(
           `SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id WHERE department = '${dept}';`,
+          (err, data) => {
+            if (err) throw err;
+            console.table(data);
+            init();
+          }
+        );
+      });
+  });
+}
+
+function viewByRole() {
+  connection.query("SELECT * FROM role", (err, data) => {
+    const roleTitles = data.map((role) => role.title);
+    inquirer
+      .prompt([
+        {
+          name: "role",
+          type: "list",
+          message: "Which type of employees do you want to see?",
+          choices: roleTitles,
+        },
+      ])
+      .then(({ role }) => {
+        connection.query(
+          `SELECT employee.first_name, employee.last_name, role.title, role.salary, department.department FROM employee INNER JOIN role ON employee.role_id = role.id INNER JOIN department ON role.department_id = department.id WHERE title = '${role}';`,
           (err, data) => {
             if (err) throw err;
             console.table(data);
