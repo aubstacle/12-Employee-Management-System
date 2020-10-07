@@ -3,14 +3,8 @@ var inquirer = require("inquirer");
 
 var connection = mysql.createConnection({
   host: "localhost",
-
-  // Your port; if not 3306
   port: 3306,
-
-  // Your username
   user: "root",
-
-  // Your password
   password: "Freeman5",
   database: "employees_db",
 });
@@ -18,6 +12,7 @@ var connection = mysql.createConnection({
 connection.connect(function (err) {
   if (err) throw err;
   console.log("connected as id " + connection.threadId);
+//   viewEmployees();
   init();
 });
 
@@ -27,7 +22,7 @@ function init() {
       {
         name: "start",
         type: "list",
-        message: "What would you like to do?",
+        message: "What do you want to do?",
         choices: [
           "View All Employees",
           "View All Departments",
