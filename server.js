@@ -37,6 +37,7 @@ function init() {
           "Add Employee",
           //   "Remove Employee",
           "Add Role",
+          "Add Department",
           "Update Employee Role",
           //   "Update Employee Manager",
           "Exit",
@@ -58,6 +59,8 @@ function init() {
         addEmployee();
       } else if (ans.start === "Add Role") {
         addRole();
+      } else if (ans.start === "Add Department") {
+        addDepartment();
       } else if (ans.start === "Update Employee Role") {
         updateRole();
       } else if (ans.start === "Exit") {
@@ -162,6 +165,29 @@ function addRole() {
       });
   });
 }
+
+function addDepartment() {
+      inquirer
+        .prompt([
+          {
+            name: "department",
+            type: "input",
+            message: "What is the name of the new department?",
+          },
+        ])
+        .then(({ department }) => {
+          connection.query(
+            "INSERT INTO department SET ?;",
+            {
+                department: department,
+            },
+            (err, data) => {
+              if (err) throw err;
+              init();
+            }
+          );
+        });
+    }
 
 function viewDepartments() {
   connection.query("SELECT * FROM department", (err, data) => {
