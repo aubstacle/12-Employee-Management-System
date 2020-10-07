@@ -35,12 +35,9 @@ function init() {
           "View Employees by Department",
           "View Employees by Role",
           "Add Employee",
-          //   "Remove Employee",
           "Add Role",
           "Add Department",
           "Update Employee Role",
-          //   "Update Employee Manager",
-          "Exit",
         ],
       },
     ])
@@ -62,9 +59,7 @@ function init() {
       } else if (ans.start === "Add Department") {
         addDepartment();
       } else if (ans.start === "Update Employee Role") {
-        updateRole();
-      } else if (ans.start === "Exit") {
-        connection.end();
+        updateEmployeeRole();
       }
     });
 }
@@ -98,7 +93,7 @@ function addEmployee() {
         {
           name: "title",
           type: "list",
-          message: "What is the employee's title?",
+          message: "What is the employee's role?",
           choices: roleTitle,
         },
       ])
@@ -116,6 +111,7 @@ function addEmployee() {
 
           (err, data) => {
             if (err) throw err;
+            viewEmployees();
             init();
           }
         );
@@ -167,27 +163,27 @@ function addRole() {
 }
 
 function addDepartment() {
-      inquirer
-        .prompt([
-          {
-            name: "department",
-            type: "input",
-            message: "What is the name of the new department?",
-          },
-        ])
-        .then(({ department }) => {
-          connection.query(
-            "INSERT INTO department SET ?;",
-            {
-                department: department,
-            },
-            (err, data) => {
-              if (err) throw err;
-              init();
-            }
-          );
-        });
-    }
+  inquirer
+    .prompt([
+      {
+        name: "department",
+        type: "input",
+        message: "What is the name of the new department?",
+      },
+    ])
+    .then(({ department }) => {
+      connection.query(
+        "INSERT INTO department SET ?;",
+        {
+          department: department,
+        },
+        (err, data) => {
+          if (err) throw err;
+          init();
+        }
+      );
+    });
+}
 
 function viewDepartments() {
   connection.query("SELECT * FROM department", (err, data) => {
@@ -248,6 +244,55 @@ function viewByRole() {
           (err, data) => {
             if (err) throw err;
             console.table(data);
+            init();
+          }
+        );
+      });
+  });
+}
+
+function updateEmployeeRole() {
+  connection.query("SELECT * FROM role", (err, data) => {
+    const roleTitle = data.map((role) => role.title);
+    inquirer
+      .prompt([
+        {
+          name: "first",
+          type: "input",
+          message: "What is the employee's first name?",
+        },
+        {
+          name: "last",
+          type: "input",
+          message: "What is the employee's last name?",
+        },
+        {
+          name: "title",
+          type: "list",
+          message: "What is the employee's new role?",
+          choices: roleTitle,
+        },
+      ])
+      .then(({ first, last, title }) => {
+        const titleChoice = data.find(
+          (roleObject) => roleObject.title === title
+        );
+        connection.query(
+          "UPDATE employee SET ? WHERE ? AND ?",
+          [
+            {
+              role_id: titleChoice.id,
+            },
+            {
+              first_name: first,
+            },
+            {
+              last_name: last,
+            },
+          ],
+          (err, data) => {
+            if (err) throw err;
+            viewEmployees();
             init();
           }
         );
